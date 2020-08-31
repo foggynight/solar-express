@@ -19,7 +19,10 @@ Player::Player(
 	int sprWidth,
 	int sprHeight
 ) :
-	pos(pos),
+	pos(olc::vf2d(
+		pos.x + (float)(sprWidth) / 2.0F,
+		pos.y + (float)(sprHeight) / 2.0F
+	)),
 	vel(vel),
 	angle(angle),
 	acc(acc),
@@ -33,19 +36,21 @@ void Player::step(float fElapsedTime)
 
 	if (pos.x < 0.0F)
 		pos.x = 0.0F;
-	else if (pos.x > scrWidth - sprWidth)
-		pos.x = scrWidth - sprWidth;
+	else if (pos.x >= scrWidth)
+		pos.x = scrWidth - 1;
 
 	if (pos.y < 0.0F)
 		pos.y = 0.0F;
-	else if (pos.y > scrHeight - sprHeight)
-		pos.y = scrHeight - sprHeight;
+	else if (pos.y >= scrHeight)
+		pos.y = scrHeight - 1;
+
+	std::cout << pos.x << " " << pos.y << std::endl;
 }
 
 void Player::thrust(float fElapsedTime, bool forward)
 {
 	vel.x += acc * cos(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
-	vel.y += acc * sin(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
+	vel.y -= acc * sin(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
 
 	float maxVelX = maxSpeed * cos(angle * pi);
 	float maxVelY = maxSpeed * sin(angle * pi);

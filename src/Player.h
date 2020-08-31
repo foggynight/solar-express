@@ -2,15 +2,15 @@
 
 class Player {
 public:
-	olc::vf2d pos; // Position of the ship
-
-private:
-	olc::vf2d vel; // Velocity of the ship
+	olc::vf2d pos; // Position of the ship's center
 	float angle;   // Direction of the ship in radians
-	float acc;     // Acceleration of the ship
 
 	int sprWidth;  // Width of the player sprite
 	int sprHeight; // Height of the player sprite
+
+private:
+	olc::vf2d vel; // Velocity of the ship
+	float acc;     // Acceleration of the ship
 
 public:
 	Player();
