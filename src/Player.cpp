@@ -1,12 +1,10 @@
-#include "olcPixelGameEngine.h"
-
 #include <cmath>
-#include <iostream>
+
+#include "olcPixelGameEngine.h"
 
 #include "globals.h"
 #include "Player.h"
 
-const float pi = 3.141592654F;
 const float maxSpeed = 100.0F;
 
 Player::Player() {}
@@ -20,8 +18,8 @@ Player::Player(
 	int sprHeight
 ) :
 	pos(olc::vf2d(
-		pos.x + (float)(sprWidth) / 2.0F,
-		pos.y + (float)(sprHeight) / 2.0F
+		pos.x + (float)sprWidth / 2.0F,
+		pos.y + (float)sprHeight / 2.0F
 	)),
 	vel(vel),
 	angle(angle),
@@ -43,8 +41,6 @@ void Player::step(float fElapsedTime)
 		pos.y = 0.0F;
 	else if (pos.y >= scrHeight)
 		pos.y = scrHeight - 1;
-
-	std::cout << pos.x << " " << pos.y << std::endl;
 }
 
 void Player::thrust(float fElapsedTime, bool forward)
@@ -62,8 +58,6 @@ void Player::thrust(float fElapsedTime, bool forward)
 	if (maxVelY == 0 && vel.y != 0) vel.y = 0;
 	else if (maxVelY > 0 && vel.y > maxVelY) vel.y = maxVelY;
 	else if (maxVelY < 0 && vel.y < maxVelY) vel.y = maxVelY;
-
-	std::cout << "Velocity: " << vel.x << " " << vel.y << std::endl;
 }
 
 void Player::rotate(float theta)
@@ -74,6 +68,4 @@ void Player::rotate(float theta)
 		angle = 2.0F + angle;
 	else if (angle >= 2.0F)
 		angle = angle - 2.0F;
-
-	std::cout << "Angle (radians/pi): " << angle << std::endl;
 }
