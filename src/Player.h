@@ -26,14 +26,14 @@ public:
 public:
 	/**
 	 * Step the ship position by velocity
-	 * 
+	 *
 	 * @param fElapsedTime Time since last frame
 	 */
 	void step(float fElapsedTime);
 
 	/**
 	 * Step the ship velocity by acceleration
-	 * 
+	 *
 	 * @param fElapsedTime Time since last frame
 	 * @param forward Ship thrust direction
 	 */
@@ -41,7 +41,7 @@ public:
 
 	/**
 	 * Rotate the ship by theta radians
-	 * 
+	 *
 	 * @param theta Number of radians to rotate by
 	 */
 	void rotate(float theta);

@@ -7,6 +7,7 @@
 #include "Player.h"
 
 const float pi = 3.141592654F;
+const float maxSpeed = 100.0F;
 
 Player::Player() {}
 
@@ -32,20 +33,30 @@ void Player::step(float fElapsedTime)
 
 	if (pos.x < 0.0F)
 		pos.x = 0.0F;
-	else if (pos.x >= scrWidth - sprWidth)
-		pos.x = scrWidth - sprWidth - 1;
+	else if (pos.x > scrWidth - sprWidth)
+		pos.x = scrWidth - sprWidth;
 
 	if (pos.y < 0.0F)
 		pos.y = 0.0F;
-	else if (pos.y >= scrHeight - sprHeight)
-		pos.y = scrHeight - sprHeight - 1;
+	else if (pos.y > scrHeight - sprHeight)
+		pos.y = scrHeight - sprHeight;
 }
 
 void Player::thrust(float fElapsedTime, bool forward)
 {
-	// TODO: manage maximum velocity
-	vel.x += acc * cos(angle * pi) * fElapsedTime * ((forward) ? 1.0F : -1.0F);
-	vel.y += acc * sin(angle * pi) * fElapsedTime * ((forward) ? 1.0F : -1.0F);
+	vel.x += acc * cos(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
+	vel.y += acc * sin(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
+
+	float maxVelX = maxSpeed * cos(angle * pi);
+	float maxVelY = maxSpeed * sin(angle * pi);
+
+	if (maxVelX == 0 && vel.x != 0) vel.x = 0;
+	else if (maxVelX > 0 && vel.x > maxVelX) vel.x = maxVelX;
+	else if (maxVelX < 0 && vel.x < maxVelX) vel.x = maxVelX;
+
+	if (maxVelY == 0 && vel.y != 0) vel.y = 0;
+	else if (maxVelY > 0 && vel.y > maxVelY) vel.y = maxVelY;
+	else if (maxVelY < 0 && vel.y < maxVelY) vel.y = maxVelY;
 
 	std::cout << "Velocity: " << vel.x << " " << vel.y << std::endl;
 }
