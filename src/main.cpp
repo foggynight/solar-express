@@ -13,8 +13,7 @@ extern const float pi = 3.141592654F;
 class SolarExpress : public olc::PixelGameEngine
 {
 private:
-	Player player;
-	olc::Sprite *sprPlayer;
+	Player *player;
 	olc::GFX2D gfx;
 	olc::GFX2D::Transform2D transform;
 
@@ -29,17 +28,12 @@ public:
 	{
 		const std::pair<float, float> startPosition(0.0F, 0.0F);
 
-		sprPlayer = new olc::Sprite("./sprites/ship.png");
-		player = Player(
-			olc::vf2d(
-				startPosition.first - sprPlayer->width,
-				startPosition.second - sprPlayer->height
-			),
+		player = new Player(
+			olc::vf2d(startPosition.first, startPosition.second),
 			olc::vf2d(0.0F, 0.0F),
 			0.5F,
 			100.0F,
-			sprPlayer->width,
-			sprPlayer->height
+			"./sprites/ship.png"
 		);
 
 		return true;
@@ -48,7 +42,7 @@ public:
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		handleUserInput(fElapsedTime);
-		player.step(fElapsedTime);
+		player->step(fElapsedTime);
 
 		Clear(olc::BLACK);
 		DrawPlayer();
@@ -58,7 +52,7 @@ public:
 
 	bool OnUserDestroy() override
 	{
-		delete sprPlayer;
+		delete player;
 
 		return true;
 	}
@@ -67,33 +61,30 @@ private:
 	void handleUserInput(float fElapsedTime)
 	{
 		if (GetKey(olc::Key::W).bHeld) {
-			player.thrust(fElapsedTime);
+			player->thrust(fElapsedTime);
 		}
 		if (GetKey(olc::Key::A).bHeld) {
-			player.rotate(1.0F * fElapsedTime);
+			player->rotate(1.0F * fElapsedTime);
 		}
 		if (GetKey(olc::Key::D).bHeld) {
-			player.rotate(-1.0F * fElapsedTime);
+			player->rotate(-1.0F * fElapsedTime);
 		}
 		if (GetKey(olc::Key::S).bHeld) {
-			player.thrust(fElapsedTime, false);
+			player->thrust(fElapsedTime, false);
 		}
 	}
 
 	void DrawPlayer()
 	{
-		float sprOffsetX = (float)player.sprWidth / 2.0F;
-		float sprOffsetY = (float)player.sprHeight / 2.0F;
-
 		transform.Reset();
-		transform.Translate(-sprOffsetX, -sprOffsetY);
-		transform.Rotate((player.angle - 0.5F) * pi);
-		transform.Translate(player.pos.x, player.pos.y);
+		transform.Translate(-player->sprOffsetX, -player->sprOffsetY);
+		transform.Rotate((player->angle - 0.5F) * pi);
+		transform.Translate(player->pos.x, player->pos.y);
 
 		auto& tRef = transform;
-		gfx.DrawSprite(sprPlayer, tRef);
+		gfx.DrawSprite(player->sprite, tRef);
 
-		Draw(player.pos.x, player.pos.y, olc::RED); // Center of ship - testing
+		Draw(player->pos.x, player->pos.y, olc::RED); // Center of ship - testing
 	}
 };
 

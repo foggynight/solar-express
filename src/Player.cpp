@@ -1,4 +1,5 @@
 #include <cmath>
+#include <string>
 
 #include "olcPixelGameEngine.h"
 
@@ -14,33 +15,33 @@ Player::Player(
 	olc::vf2d vel,
 	float angle,
 	float acc,
-	int sprWidth,
-	int sprHeight
+	std::string sprPath
 ) :
-	pos(olc::vf2d(
-		pos.x + (float)sprWidth / 2.0F,
-		pos.y + (float)sprHeight / 2.0F
-	)),
+	pos(pos),
 	vel(vel),
 	angle(angle),
-	acc(acc),
-	sprWidth(sprWidth),
-	sprHeight(sprHeight)
-{}
+	acc(acc)
+{
+	sprite = new olc::Sprite(sprPath);
+
+	sprOffsetX = (float)sprite->width / 2.0F;
+	sprOffsetY = (float)sprite->height / 2.0F;
+}
+
+Player::~Player()
+{
+	delete sprite;
+}
 
 void Player::step(float fElapsedTime)
 {
 	pos += vel * fElapsedTime;
 
-	if (pos.x < 0.0F)
-		pos.x = 0.0F;
-	else if (pos.x >= scrWidth)
-		pos.x = scrWidth - 1;
+	if (pos.x < 0.0F) pos.x = 0.0F;
+	else if (pos.x >= scrWidth) pos.x = scrWidth - 1;
 
-	if (pos.y < 0.0F)
-		pos.y = 0.0F;
-	else if (pos.y >= scrHeight)
-		pos.y = scrHeight - 1;
+	if (pos.y < 0.0F) pos.y = 0.0F;
+	else if (pos.y >= scrHeight) pos.y = scrHeight - 1;
 }
 
 void Player::thrust(float fElapsedTime, bool forward)
@@ -64,8 +65,6 @@ void Player::rotate(float theta)
 {
 	angle += theta;
 
-	if (angle < 0.0F)
-		angle = 2.0F + angle;
-	else if (angle >= 2.0F)
-		angle = angle - 2.0F;
+	if (angle < 0.0F) angle = 2.0F + angle;
+	else if (angle >= 2.0F) angle = angle - 2.0F;
 }

@@ -1,16 +1,19 @@
+#include <string>
+
 #include "olcPixelGameEngine.h"
 
 class Player {
 public:
-	olc::vf2d pos; // Position of the ship's center
-	float angle;   // Direction of the ship in radians
+	olc::vf2d pos;       // Position of the ship's center
+	float angle;         // Direction of the ship in radians
 
-	int sprWidth;  // Width of the player sprite
-	int sprHeight; // Height of the player sprite
+	olc::Sprite *sprite; // Sprite of the player ship
+	float sprOffsetX;
+	float sprOffsetY;
 
 private:
-	olc::vf2d vel; // Velocity of the ship
-	float acc;     // Acceleration of the ship
+	olc::vf2d vel;       // Velocity of the ship
+	float acc;           // Acceleration of the ship
 
 public:
 	Player();
@@ -19,9 +22,9 @@ public:
 		olc::vf2d vel,
 		float angle,
 		float acc,
-		int sprWidth,
-		int sprHeight
+		std::string sprPath
 	);
+	~Player();
 
 public:
 	/**
