@@ -51,13 +51,15 @@ void Player::thrust(float fElapsedTime, bool forward)
 	float maxVelX = maxSpeed * cos(angle * pi);
 	float maxVelY = maxSpeed * sin(angle * pi);
 
-	if (maxVelX == 0 && vel.x != 0) vel.x = 0;
-	else if (maxVelX > 0 && vel.x > maxVelX) vel.x = maxVelX;
-	else if (maxVelX < 0 && vel.x < maxVelX) vel.x = maxVelX;
+	auto fAbs = [](float n) { return (n > 0.0F) ? n : -1.0F * n; };
 
-	if (maxVelY == 0 && vel.y != 0) vel.y = 0;
-	else if (maxVelY > 0 && vel.y > maxVelY) vel.y = maxVelY;
-	else if (maxVelY < 0 && vel.y < maxVelY) vel.y = maxVelY;
+	if (maxVelX == 0.0F && vel.x != 0.0F) vel.x *= fAbs(fAbs(vel.x) - acc*fElapsedTime);
+	else if (maxVelX > 0.0F && vel.x > maxVelX) vel.x -= acc * fElapsedTime;
+	else if (maxVelX < 0.0F && vel.x < maxVelX) vel.x += acc * fElapsedTime;
+
+	if (maxVelY == 0.0F && vel.y != 0.0F) vel.y *= fAbs(fAbs(vel.y) - acc*fElapsedTime);
+	else if (maxVelY > 0.0F && vel.y > maxVelY) vel.y -= acc * fElapsedTime;
+	else if (maxVelY < 0.0F && vel.y < maxVelY) vel.y += acc * fElapsedTime;
 }
 
 void Player::rotate(float theta)

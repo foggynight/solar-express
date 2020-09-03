@@ -13,14 +13,14 @@ extern const int scrWidth = 640;
 extern const int scrHeight = 480;
 extern const float pi = 3.141592654F;
 
-/* Game states. */
+/* Game states */
 enum class State {
 	MAINMENU,
 	OPTIONS,
 	INGAME
 };
 
-/* Main menu options. */
+/* Main menu options */
 enum class MMItem {
 	NONE,
 	START,
@@ -98,9 +98,27 @@ public:
 	}
 
 private: // Main menu functions
+	/** Get menu item under cursor. */
+	MMItem getItemMM()
+	{
+		int x = GetMouseX();
+		int y = GetMouseY();
+
+		if (x < scrWidth / 3 || x > scrWidth / 3 * 2)
+			return MMItem::NONE;
+
+		int listY = scrHeight / 3 + 50;
+		for (int i = 1; i < 4; ++i) {
+			if (y >= listY - 10 && y <= listY + 30)
+				return (MMItem)i;
+			listY += 50;
+		}
+
+		return MMItem::NONE;
+	}
+
 	/**
 	 * Draw the main menu.
-	 *
 	 * @param item Menu item under cursor
 	 * @param bPressed Was item pressed
 	 **/
@@ -142,28 +160,8 @@ private: // Main menu functions
 		}
 	}
 
-	/** Get menu item under cursor. */
-	MMItem getItemMM()
-	{
-		int x = GetMouseX();
-		int y = GetMouseY();
-
-		if (x < scrWidth / 3 || x > scrWidth / 3 * 2)
-			return MMItem::NONE;
-
-		int listY = scrHeight / 3 + 50;
-		for (int i = 1; i < 4; ++i) {
-			if (y >= listY - 10 && y <= listY + 30)
-				return (MMItem)i;
-			listY += 50;
-		}
-
-		return MMItem::NONE;
-	}
-
 	/**
 	 * Update the game state based on main menu items.
-	 *
 	 * @param item Item under cursor
 	 **/
 	void updateStateMM(MMItem item)
@@ -178,7 +176,6 @@ private: // Main menu functions
 private: // In game functions
 	/**
 	 * Handle in-game user input.
-	 *
 	 * @param fElapsedTime Amount of time since last frame (seconds)
 	 */
 	void userInputIG(float fElapsedTime)
