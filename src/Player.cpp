@@ -23,7 +23,6 @@ Player::Player(
 	acc(acc)
 {
 	sprite = new olc::Sprite(sprPath);
-
 	sprOffsetX = (float)sprite->width / 2.0F;
 	sprOffsetY = (float)sprite->height / 2.0F;
 }

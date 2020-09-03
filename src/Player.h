@@ -8,8 +8,8 @@ public:
 	float angle;         // Direction of the ship in radians
 
 	olc::Sprite *sprite; // Sprite of the player ship
-	float sprOffsetX;
-	float sprOffsetY;
+	float sprOffsetX;    // Horizontal offset to ship center
+	float sprOffsetY;    // Vertical offset to ship center
 
 private:
 	olc::vf2d vel;       // Velocity of the ship
@@ -28,14 +28,14 @@ public:
 
 public:
 	/**
-	 * Step the ship position by velocity
+	 * Step the ship position by velocity.
 	 *
 	 * @param fElapsedTime Time since last frame
 	 */
 	void step(float fElapsedTime);
 
 	/**
-	 * Step the ship velocity by acceleration
+	 * Step the ship velocity by acceleration.
 	 *
 	 * @param fElapsedTime Time since last frame
 	 * @param forward Ship thrust direction
@@ -43,7 +43,7 @@ public:
 	void thrust(float fElapsedTime, bool forward = true);
 
 	/**
-	 * Rotate the ship by theta radians
+	 * Rotate the ship by theta radians.
 	 *
 	 * @param theta Number of radians to rotate by
 	 */
