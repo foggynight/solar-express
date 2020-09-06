@@ -1,0 +1,5 @@
+class Level
+{
+public:
+	Level();
+};

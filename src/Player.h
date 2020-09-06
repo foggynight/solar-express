@@ -2,7 +2,8 @@
 
 #include "olcPixelGameEngine.h"
 
-class Player {
+class Player
+{
 public:
 	olc::vf2d pos;       // Position of the ship's center
 	float angle;         // Direction of the ship in radians
@@ -28,21 +29,24 @@ public:
 
 public:
 	/**
-	 * Step the ship position by velocity.
+	 * Update the ship position based on the velocity vector.
+	 *
 	 * @param fElapsedTime Time since last frame
 	 */
 	void step(float fElapsedTime);
 
 	/**
-	 * Step the ship velocity by acceleration.
+	 * Thrust the ship, modifying the velocity vector.
+	 *
 	 * @param fElapsedTime Time since last frame
-	 * @param forward Ship thrust direction
+	 * @param forward Direction of thrust
 	 */
 	void thrust(float fElapsedTime, bool forward = true);
 
 	/**
-	 * Rotate the ship by theta radians.
-	 * @param theta Number of radians to rotate by
+	 * Rotate the ship, modifying the ship angle.
+	 *
+	 * @param theta Angle in radians
 	 */
 	void rotate(float theta);
 };
