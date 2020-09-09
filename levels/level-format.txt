@@ -1,0 +1,6 @@
+startPosition.x startPosition.y
+startVelocity.x startVelocity.y
+goalPosition.x goalPosition.y
+startAngle
+acceleration
+spritePath

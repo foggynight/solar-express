@@ -10,26 +10,16 @@ const float maxSpeed = 100.0F;
 
 Player::Player() {}
 
-Player::Player(
-	olc::vf2d pos,
-	olc::vf2d vel,
-	float angle,
-	float acc,
-	std::string sprPath
-) :
-	pos(pos),
-	vel(vel),
-	angle(angle),
-	acc(acc)
-{
-	sprite = new olc::Sprite(sprPath);
-	sprOffsetX = (float)sprite->width / 2.0F;
-	sprOffsetY = (float)sprite->height / 2.0F;
-}
-
 Player::~Player()
 {
 	delete sprite;
+}
+
+void Player::loadSprite(std::string path)
+{
+	sprite = new olc::Sprite(path);
+	sprOffsetX = (float)sprite->width / 2.0F;
+	sprOffsetY = (float)sprite->height / 2.0F;
 }
 
 void Player::step(float fElapsedTime)

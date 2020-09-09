@@ -1,7 +1,8 @@
 #include <array>
 #include <cstdlib>
+#include <fstream>
 #include <string>
-#include <utility>
+#include <sstream>
 
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_Graphics2D.h"
@@ -10,28 +11,29 @@
 #include "Level.h"
 #include "Player.h"
 
-extern const int scrWidth = 640;
-extern const int scrHeight = 480;
+extern const int scrWidth = 1280;
+extern const int scrHeight = 720;
 extern const float pi = 3.141592654F;
 
 /* Game states */
 enum class State {
 	MAINMENU,
 	OPTIONS,
-	LEVELS,
+	SELECTLEVEL,
+	LOADLEVEL,
 	INGAME
 };
 
 /* Main menu options */
 enum class MMItem {
-	NONE,
+	NONE = -1,
 	START,
 	OPTIONS,
 	QUIT
 };
 
 /* Number of levels */
-const std::size_t levelCount = 3;
+const std::size_t levelCount = 5;
 
 class SolarExpress : public olc::PixelGameEngine
 {
@@ -40,10 +42,12 @@ private: // Global members
 
 private: // Level members
 	int levelNumber;
-	std::array<Level, levelCount> levelArr;
+	Level level;
+
+private: // Player members
+	Player player;
 
 private: // In game members
-	Player *player;
 	olc::GFX2D gfx;
 	olc::GFX2D::Transform2D transform;
 
@@ -57,15 +61,6 @@ public:
 	bool OnUserCreate() override
 	{
 		state = State::MAINMENU;
-
-		const std::pair<float, float> startPosition(0.0F, 0.0F);
-		player = new Player(
-			olc::vf2d(startPosition.first, startPosition.second),
-			olc::vf2d(0.0F, 0.0F),
-			0.5F,
-			100.0F,
-			"./sprites/ship.png"
-		);
 
 		return true;
 	}
@@ -82,7 +77,7 @@ public:
 				updateStateMM(item);
 			} break;
 
-			case State::LEVELS: {
+			case State::SELECTLEVEL: {
 				int item = getItemLS();
 
 				Clear(olc::BLACK);
@@ -101,9 +96,29 @@ public:
 				);
 			} break;
 
+			case State::LOADLEVEL: {
+				std::stringstream levelPath;
+				levelPath << "level-" << levelNumber << ".data";
+
+				std::ifstream levelFile;
+				levelFile.open("./levels/" + levelPath.str());
+
+				loadLevelDataLL(levelFile);
+
+				// Fill level obstacle vector
+
+				player.pos = level.startPosition;
+				player.vel = level.startVelocity;
+				loadPlayerDataLL(levelFile);
+
+				levelFile.close();
+
+				state = State::INGAME;
+			} break;
+
 			case State::INGAME: {
 				userInputIG(fElapsedTime);
-				player->step(fElapsedTime);
+				player.step(fElapsedTime);
 
 				Clear(olc::BLACK);
 				drawPlayerIG();
@@ -113,16 +128,11 @@ public:
 		return true;
 	}
 
-	bool OnUserDestroy() override
-	{
-		delete player;
-
-		return true;
-	}
-
 private: // Main menu functions
 	/**
 	 * Get menu item under the cursor.
+	 *
+	 * @return Menu item under the cursor
 	 */
 	MMItem getItemMM()
 	{
@@ -133,7 +143,7 @@ private: // Main menu functions
 			return MMItem::NONE;
 
 		int itemY = scrHeight / 3 + 50;
-		for (int i = 1; i < 4; ++i) {
+		for (int i = 0; i < 3; ++i) {
 			if (y >= itemY - 10 && y <= itemY + 30)
 				return (MMItem)i;
 			itemY += 50;
@@ -145,13 +155,13 @@ private: // Main menu functions
 	/**
 	 * Draw the main menu.
 	 *
-	 * @param item Menu item under the cursor
+	 * @param item Item under the cursor
 	 */
 	void drawMM(MMItem item)
 	{
 		/* Draw the game title */
 		olc::vi2d titleSize = GetTextSize("Solar Express");
-		unsigned int titleScale = 3U;
+		int titleScale = 3U;
 		DrawString(
 			scrWidth / 2 - titleSize.x * titleScale / 2,
 			scrHeight / 3 - 30,
@@ -159,7 +169,7 @@ private: // Main menu functions
 			olc::WHITE,
 			titleScale
 		);
-		DrawLine(100, scrHeight/3 + 5, scrWidth-101, scrHeight/3 + 5);
+		DrawLine(200, scrHeight/3 + 5, scrWidth-201, scrHeight/3 + 5);
 
 		/* Draw the menu items */
 		std::array<std::string, 3> menuStrArr {
@@ -171,7 +181,7 @@ private: // Main menu functions
 		int itemScale = 2U;
 		for (int i = 0; i < 3; ++i) {
 			olc::Pixel color = olc::WHITE;
-			if (i == (int)item - 1) color = olc::RED;
+			if (i == (int)item) color = olc::RED;
 
 			olc::vi2d size = GetTextSize(menuStrArr[i]);
 			DrawString(
@@ -193,13 +203,13 @@ private: // Main menu functions
 	void updateStateMM(MMItem item)
 	{
 		if (GetMouse(0).bPressed) {
-			if (item == MMItem::START) state = State::LEVELS;
+			if (item == MMItem::START) state = State::SELECTLEVEL;
 			else if (item == MMItem::OPTIONS) state = State::OPTIONS;
 			else if (item == MMItem::QUIT) exit(0);
 		}
 	}
 
-private: // Level selection functions
+private: // Select level functions
 	/**
 	 * Get level selection item under the cursor.
 	 */
@@ -209,16 +219,16 @@ private: // Level selection functions
 		int y = GetMouseY();
 
 		if (x < scrWidth / 3 || x > scrWidth / 3 * 2)
-			return -1;
+			return 0;
 
 		int itemY = scrHeight / 3;
-		for (int i = 0; i < levelCount; ++i) {
+		for (int i = 1; i <= levelCount; ++i) {
 			if (y >= itemY - 10 && y <= itemY + 30)
 				return i;
 			itemY += 50;
 		}
 
-		return -1;
+		return 0;
 	}
 
 	/**
@@ -232,13 +242,13 @@ private: // Level selection functions
 		int listYStart = scrHeight / 3;
 		int listGap = 50;
 
-		for (int i = 0; i < levelCount; ++i) {
+		for (int i = 1; i <= levelCount; ++i) {
 			olc::Pixel color = olc::WHITE;
 			if (i == item) color = olc::RED;
 			DrawString(
 				listXStart,
-				listYStart + i * listGap,
-				"Level " + std::to_string(i + 1),
+				listYStart + (i-1) * listGap,
+				"Level " + std::to_string(i),
 				color,
 				2U
 			);
@@ -252,10 +262,62 @@ private: // Level selection functions
 	 */
 	void updateStateLS(int item)
 	{
-		if (item > -1 && GetMouse(0).bPressed) {
+		if (item > 0 && GetMouse(0).bPressed) {
 			levelNumber = item;
-			state = State::INGAME;
+			state = State::LOADLEVEL;
 		}
+	}
+
+private: // Load level functions
+	/**
+	 * Read a line from the input file delimited by delim, converted to a float.
+	 *
+	 * @param file Level data input file stream
+	 * @param delim Character to delimit the line of data
+	 *
+	 * @return The string read from the file, converted to a float
+	 */
+	float readFloatLL(std::ifstream& file, char delim = '\n')
+	{
+		static const int bufferLength = 81;
+		static char buffer[bufferLength];
+		file.getline(buffer, bufferLength, delim);
+		std::string str(buffer);
+		return std::stof(buffer);
+	}
+
+	/**
+	 * Setup the level, reading from a level data file.
+	 *
+	 * @param levelFile Input file stream
+	 */
+	void loadLevelDataLL(std::ifstream& levelFile)
+	{
+		level.startPosition.x = readFloatLL(levelFile, ' '); // Start position x value
+		level.startPosition.y = readFloatLL(levelFile);      // Start position y value
+
+		level.startVelocity.x = readFloatLL(levelFile, ' '); // Start velocity x value
+		level.startVelocity.y = readFloatLL(levelFile);      // Start velocity y value
+
+		level.goalPosition.x = readFloatLL(levelFile, ' ');  // Goal position x value
+		level.goalPosition.y = readFloatLL(levelFile);       // Goal position y value
+	}
+
+	/**
+	 * Setup the player, reading from a level data file.
+	 *
+	 * @param levelFile Input file stream
+	 */
+	void loadPlayerDataLL(std::ifstream& levelFile)
+	{
+		player.angle = readFloatLL(levelFile);   // Player ship angle
+		player.acc = readFloatLL(levelFile);     // Player ship acceleration
+
+		const int bufferLength = 81;
+		char sprPath[bufferLength];
+		levelFile.getline(sprPath, bufferLength);
+
+		player.loadSprite(std::string(sprPath));
 	}
 
 private: // In game functions
@@ -267,16 +329,16 @@ private: // In game functions
 	void userInputIG(float fElapsedTime)
 	{
 		if (GetKey(olc::Key::W).bHeld) {
-			player->thrust(fElapsedTime);
+			player.thrust(fElapsedTime);
 		}
 		if (GetKey(olc::Key::A).bHeld) {
-			player->rotate(1.0F * fElapsedTime);
+			player.rotate(1.0F * fElapsedTime);
 		}
 		if (GetKey(olc::Key::D).bHeld) {
-			player->rotate(-1.0F * fElapsedTime);
+			player.rotate(-1.0F * fElapsedTime);
 		}
 		if (GetKey(olc::Key::S).bHeld) {
-			player->thrust(fElapsedTime, false);
+			player.thrust(fElapsedTime, false);
 		}
 	}
 
@@ -286,12 +348,12 @@ private: // In game functions
 	void drawPlayerIG()
 	{
 		transform.Reset();
-		transform.Translate(-player->sprOffsetX, -player->sprOffsetY);
-		transform.Rotate((player->angle - 0.5F) * pi);
-		transform.Translate(player->pos.x, player->pos.y);
+		transform.Translate(-player.sprOffsetX, -player.sprOffsetY);
+		transform.Rotate((player.angle - 0.5F) * pi);
+		transform.Translate(player.pos.x, player.pos.y);
 
 		auto& tRef = transform;
-		gfx.DrawSprite(player->sprite, tRef);
+		gfx.DrawSprite(player.sprite, tRef);
 	}
 };
 
