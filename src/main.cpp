@@ -45,7 +45,7 @@ private: // Level members
 	Level level;
 
 private: // Player members
-	Player player;
+	Player *player;
 
 private: // In game members
 	olc::GFX2D gfx;
@@ -104,12 +104,10 @@ public:
 				levelFile.open("./levels/" + levelPath.str());
 
 				loadLevelDataLL(levelFile);
+				loadPlayerDataLL(levelFile);
 
 				// Fill level obstacle vector
 
-				player.pos = level.startPosition;
-				player.vel = level.startVelocity;
-				loadPlayerDataLL(levelFile);
 
 				levelFile.close();
 
@@ -118,12 +116,19 @@ public:
 
 			case State::INGAME: {
 				userInputIG(fElapsedTime);
-				player.step(fElapsedTime);
+				player->step(fElapsedTime);
 
 				Clear(olc::BLACK);
 				drawPlayerIG();
 			} break;
 		};
+
+		return true;
+	}
+
+	bool OnUserDestroy() override
+	{
+		delete player;
 
 		return true;
 	}
@@ -310,14 +315,16 @@ private: // Load level functions
 	 */
 	void loadPlayerDataLL(std::ifstream& levelFile)
 	{
-		player.angle = readFloatLL(levelFile);   // Player ship angle
-		player.acc = readFloatLL(levelFile);     // Player ship acceleration
+		float angle = readFloatLL(levelFile);
+		float acc = readFloatLL(levelFile);
 
 		const int bufferLength = 81;
 		char sprPath[bufferLength];
 		levelFile.getline(sprPath, bufferLength);
+		std::string path(sprPath);
+		std::cout << path << std::endl;
 
-		player.loadSprite(std::string(sprPath));
+		player = new Player(level.startPosition, level.startVelocity, angle, acc, path);
 	}
 
 private: // In game functions
@@ -329,16 +336,16 @@ private: // In game functions
 	void userInputIG(float fElapsedTime)
 	{
 		if (GetKey(olc::Key::W).bHeld) {
-			player.thrust(fElapsedTime);
+			player->thrust(fElapsedTime);
 		}
 		if (GetKey(olc::Key::A).bHeld) {
-			player.rotate(1.0F * fElapsedTime);
+			player->rotate(fElapsedTime, 1.0F);
 		}
 		if (GetKey(olc::Key::D).bHeld) {
-			player.rotate(-1.0F * fElapsedTime);
+			player->rotate(fElapsedTime, -1.0F);
 		}
 		if (GetKey(olc::Key::S).bHeld) {
-			player.thrust(fElapsedTime, false);
+			player->thrust(fElapsedTime, false);
 		}
 	}
 
@@ -348,12 +355,12 @@ private: // In game functions
 	void drawPlayerIG()
 	{
 		transform.Reset();
-		transform.Translate(-player.sprOffsetX, -player.sprOffsetY);
-		transform.Rotate((player.angle - 0.5F) * pi);
-		transform.Translate(player.pos.x, player.pos.y);
+		transform.Translate(-player->sprOffset.x, -player->sprOffset.y);
+		transform.Rotate((player->angle - 0.5F) * pi);
+		transform.Translate(player->pos.x, player->pos.y);
 
 		auto& tRef = transform;
-		gfx.DrawSprite(player.sprite, tRef);
+		gfx.DrawSprite(player->sprite, tRef);
 	}
 };
 
