@@ -8,6 +8,7 @@
 #include "olcPGEX_Graphics2D.h"
 
 #include "globals.h"
+#include "Asteroid.h"
 #include "Level.h"
 #include "Player.h"
 
@@ -42,7 +43,7 @@ private: // Global members
 
 private: // Level members
 	int levelNumber;
-	Level level;
+	Level *level;
 
 private: // Player members
 	Player *player;
@@ -68,60 +69,64 @@ public:
 	bool OnUserUpdate(float fElapsedTime) override
 	{
 		switch (state) {
-			case State::MAINMENU: {
-				MMItem item = getItemMM();
+		case State::MAINMENU: {
+			MMItem item = getItemMM();
 
-				Clear(olc::BLACK);
-				drawMM(item);
+			Clear(olc::BLACK);
+			drawMM(item);
 
-				updateStateMM(item);
-			} break;
+			updateStateMM(item);
+		} break;
 
-			case State::SELECTLEVEL: {
-				int item = getItemLS();
+		case State::SELECTLEVEL: {
+			int item = getItemLS();
 
-				Clear(olc::BLACK);
-				drawLS(item);
+			Clear(olc::BLACK);
+			drawLS(item);
 
-				updateStateLS(item);
-			} break;
+			updateStateLS(item);
+		} break;
 
-			case State::OPTIONS: {
-				Clear(olc::BLACK);
-				olc::vi2d size = GetTextSize("Not yet implemented.");
-				DrawString(
-					scrWidth / 2 - size.x / 2,
-					scrHeight / 2 - size.y / 2,
-					"Not yet implemented."
-				);
-			} break;
+		case State::OPTIONS: {
+			Clear(olc::BLACK);
+			olc::vi2d size = GetTextSize("Not yet implemented.");
+			DrawString(
+				scrWidth / 2 - size.x / 2,
+				scrHeight / 2 - size.y / 2,
+				"Not yet implemented."
+			);
+		} break;
 
-			case State::LOADLEVEL: {
-				std::stringstream levelPath;
-				levelPath << "level-" << levelNumber << ".data";
+		case State::LOADLEVEL: {
+			std::stringstream levelPath;
+			levelPath << "level-" << levelNumber << ".data";
 
-				std::ifstream levelFile;
-				levelFile.open("./levels/" + levelPath.str());
+			std::ifstream levelFile;
+			levelFile.open("./levels/" + levelPath.str());
 
-				loadLevelDataLL(levelFile);
-				loadPlayerDataLL(levelFile);
+			loadLevelDataLL(levelFile);
+			loadPlayerDataLL(levelFile);
+			// loadObstacleDataLL(levelFile);
 
-				// Fill level obstacle vector
+			level->obstacleVec.push_back(new Asteroid({100.0F,100.0F}, {55.0F,15.0F}, 0));
+			level->obstacleVec.push_back(new Asteroid({700.0F,200.0F}, {-10.0F,20.0F}, 0));
 
+			levelFile.close();
+			state = State::INGAME;
+		} break;
 
-				levelFile.close();
+		case State::INGAME: {
+			userInputIG(fElapsedTime);
 
-				state = State::INGAME;
-			} break;
+			for (auto obstacle : level->obstacleVec)
+				obstacle->step(fElapsedTime);
+			player->step(fElapsedTime);
 
-			case State::INGAME: {
-				userInputIG(fElapsedTime);
-				player->step(fElapsedTime);
-
-				Clear(olc::BLACK);
-				drawPlayerIG();
-			} break;
-		};
+			Clear(olc::BLACK);
+			drawObstaclesIG();
+			drawPlayerIG();
+		} break;
+		}
 
 		return true;
 	}
@@ -129,6 +134,7 @@ public:
 	bool OnUserDestroy() override
 	{
 		delete player;
+		delete level;
 
 		return true;
 	}
@@ -284,10 +290,8 @@ private: // Load level functions
 	 */
 	float readFloatLL(std::ifstream& file, char delim = '\n')
 	{
-		static const int bufferLength = 81;
-		static char buffer[bufferLength];
-		file.getline(buffer, bufferLength, delim);
-		std::string str(buffer);
+		std::string buffer;
+		std::getline(file, buffer, delim);
 		return std::stof(buffer);
 	}
 
@@ -298,14 +302,16 @@ private: // Load level functions
 	 */
 	void loadLevelDataLL(std::ifstream& levelFile)
 	{
-		level.startPosition.x = readFloatLL(levelFile, ' '); // Start position x value
-		level.startPosition.y = readFloatLL(levelFile);      // Start position y value
+		level = new Level();
 
-		level.startVelocity.x = readFloatLL(levelFile, ' '); // Start velocity x value
-		level.startVelocity.y = readFloatLL(levelFile);      // Start velocity y value
+		level->startPosition.x = readFloatLL(levelFile, ' '); // Start position x value
+		level->startPosition.y = readFloatLL(levelFile);      // Start position y value
 
-		level.goalPosition.x = readFloatLL(levelFile, ' ');  // Goal position x value
-		level.goalPosition.y = readFloatLL(levelFile);       // Goal position y value
+		level->startVelocity.x = readFloatLL(levelFile, ' '); // Start velocity x value
+		level->startVelocity.y = readFloatLL(levelFile);      // Start velocity y value
+
+		level->goalPosition.x = readFloatLL(levelFile, ' ');  // Goal position x value
+		level->goalPosition.y = readFloatLL(levelFile);       // Goal position y value
 	}
 
 	/**
@@ -318,13 +324,10 @@ private: // Load level functions
 		float angle = readFloatLL(levelFile);
 		float acc = readFloatLL(levelFile);
 
-		const int bufferLength = 81;
-		char sprPath[bufferLength];
-		levelFile.getline(sprPath, bufferLength);
-		std::string path(sprPath);
-		std::cout << path << std::endl;
+		std::string path;
+		std::getline(levelFile, path);
 
-		player = new Player(level.startPosition, level.startVelocity, angle, acc, path);
+		player = new Player(level->startPosition, level->startVelocity, angle, acc, path);
 	}
 
 private: // In game functions
@@ -359,8 +362,22 @@ private: // In game functions
 		transform.Rotate((player->angle - 0.5F) * pi);
 		transform.Translate(player->pos.x, player->pos.y);
 
-		auto& tRef = transform;
-		gfx.DrawSprite(player->sprite, tRef);
+		gfx.DrawSprite(player->sprite, transform);
+	}
+
+	/**
+	 * Draw the level obstacles on screen.
+	 */
+	void drawObstaclesIG()
+	{
+		for (auto obstacle : level->obstacleVec) {
+			transform.Reset();
+			transform.Translate(-obstacle->sprOffset.x, -obstacle->sprOffset.y);
+			transform.Rotate(obstacle->angle * pi);
+			transform.Translate(obstacle->pos.x, obstacle->pos.y);
+
+			gfx.DrawSprite(obstacle->sprite, transform);
+		}
 	}
 };
 

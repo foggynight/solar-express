@@ -1,3 +1,6 @@
+#ifndef BODY_H
+#define BODY_H
+
 #include <string>
 
 #include "olcPixelGameEngine.h"
@@ -11,7 +14,7 @@
 class Body
 {
 public:
-	olc::vf2d pos;       // Position of the body
+	olc::vf2d pos;       // Position of the body center
 	olc::vf2d vel;       // Velocity of the body
 	float angle;         // Angle of the body
 
@@ -38,3 +41,5 @@ public:
 	 */
 	void rotate(float fElapsedTime, float omega);
 };
+
+#endif

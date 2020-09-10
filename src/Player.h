@@ -1,4 +1,5 @@
 #include "olcPixelGameEngine.h"
+
 #include "Body.h"
 
 /**
@@ -6,7 +7,7 @@
  *
  * Contains the player ship state, as well as implement player flight.
  *
- * To be constructed after selecting a level from the level selection menu.
+ * To be constructed after constructing the level.
  */
 class Player : public Body
 {
