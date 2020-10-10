@@ -1,3 +1,12 @@
-olcPixelGameEngine
-src/olcPixelGameEngine.h
-src/olcPGEX_Graphics2D.h
+*
+!src
+src/*
+
+!.gitignore
+!makefile
+!*.md
+
+!src/*.h
+!src/*.cpp
+
+src/olc*.h
