@@ -3,4 +3,5 @@ startVelocity.x startVelocity.y
 goalPosition.x goalPosition.y
 startAngle
 acceleration
+maxSpeed
 spritePath

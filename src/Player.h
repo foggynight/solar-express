@@ -12,7 +12,8 @@
 class Player : public Body
 {
 public:
-	float acc;           // Acceleration of the ship
+	float acc;      // Acceleration of the ship
+	float maxSpeed; // Max speed of the ship
 
 public:
 	Player();
@@ -21,6 +22,7 @@ public:
 		olc::vf2d vel,
 		float angle,
 		float acc,
+		float maxSpeed,
 		std::string path
 	);
 

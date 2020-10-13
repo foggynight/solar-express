@@ -12,10 +12,6 @@
 #include "Level.h"
 #include "Player.h"
 
-extern const int scrWidth = 1280;
-extern const int scrHeight = 720;
-extern const float pi = 3.141592654F;
-
 /* Game states */
 enum class State {
 	MAINMENU,
@@ -33,15 +29,13 @@ enum class MMItem {
 	QUIT
 };
 
-/* Number of levels */
-const std::size_t levelCount = 5;
-
 class SolarExpress : public olc::PixelGameEngine
 {
 private: // Global members
 	State state;
 
 private: // Level members
+	std::size_t levelCount = 1;
 	int levelNumber;
 	Level *level;
 
@@ -106,10 +100,6 @@ public:
 
 			loadLevelDataLL(levelFile);
 			loadPlayerDataLL(levelFile);
-			// loadObstacleDataLL(levelFile);
-
-			level->obstacleVec.push_back(new Asteroid({100.0F,100.0F}, {55.0F,15.0F}, 0));
-			level->obstacleVec.push_back(new Asteroid({700.0F,200.0F}, {-10.0F,20.0F}, 0));
 
 			levelFile.close();
 			state = State::INGAME;
@@ -222,27 +212,6 @@ private: // Main menu functions
 
 private: // Select level functions
 	/**
-	 * Get level selection item under the cursor.
-	 */
-	int getItemLS()
-	{
-		int x = GetMouseX();
-		int y = GetMouseY();
-
-		if (x < scrWidth / 3 || x > scrWidth / 3 * 2)
-			return 0;
-
-		int itemY = scrHeight / 3;
-		for (int i = 1; i <= levelCount; ++i) {
-			if (y >= itemY - 10 && y <= itemY + 30)
-				return i;
-			itemY += 50;
-		}
-
-		return 0;
-	}
-
-	/**
 	 * Draw the level selection menu.
 	 *
 	 * @param item Item under the cursor
@@ -250,7 +219,7 @@ private: // Select level functions
 	void drawLS(int item)
 	{
 		int listXStart = scrWidth / 2 - GetTextSize("Level n").x;
-		int listYStart = scrHeight / 3;
+		int listYStart = scrHeight * 2 / 5;
 		int listGap = 50;
 
 		for (int i = 1; i <= levelCount; ++i) {
@@ -264,6 +233,27 @@ private: // Select level functions
 				2U
 			);
 		}
+	}
+
+	/**
+	 * Get level selection item under the cursor.
+	 */
+	int getItemLS()
+	{
+		int x = GetMouseX();
+		int y = GetMouseY();
+
+		if (x < scrWidth / 3 || x > scrWidth / 3 * 2)
+			return 0;
+
+		int itemY = scrHeight * 2 / 5;
+		for (int i = 1; i <= levelCount; ++i) {
+			if (y >= itemY - 10 && y <= itemY + 30)
+				return i;
+			itemY += 50;
+		}
+
+		return 0;
 	}
 
 	/**
@@ -304,14 +294,14 @@ private: // Load level functions
 	{
 		level = new Level();
 
-		level->startPosition.x = readFloatLL(levelFile, ' '); // Start position x value
-		level->startPosition.y = readFloatLL(levelFile);      // Start position y value
+		level->startPosition.x = readFloatLL(levelFile, ' ');
+		level->startPosition.y = readFloatLL(levelFile);
 
-		level->startVelocity.x = readFloatLL(levelFile, ' '); // Start velocity x value
-		level->startVelocity.y = readFloatLL(levelFile);      // Start velocity y value
+		level->startVelocity.x = readFloatLL(levelFile, ' ');
+		level->startVelocity.y = readFloatLL(levelFile);
 
-		level->goalPosition.x = readFloatLL(levelFile, ' ');  // Goal position x value
-		level->goalPosition.y = readFloatLL(levelFile);       // Goal position y value
+		level->goalPosition.x = readFloatLL(levelFile, ' ');
+		level->goalPosition.y = readFloatLL(levelFile);
 	}
 
 	/**
@@ -323,11 +313,19 @@ private: // Load level functions
 	{
 		float angle = readFloatLL(levelFile);
 		float acc = readFloatLL(levelFile);
+		float maxSpeed = readFloatLL(levelFile);
 
 		std::string path;
 		std::getline(levelFile, path);
 
-		player = new Player(level->startPosition, level->startVelocity, angle, acc, path);
+		player = new Player(
+			level->startPosition,
+			level->startVelocity,
+			angle,
+			acc,
+			maxSpeed,
+			path
+		);
 	}
 
 private: // In game functions

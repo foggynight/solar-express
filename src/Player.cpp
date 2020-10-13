@@ -6,8 +6,6 @@
 #include "globals.h"
 #include "Player.h"
 
-const float maxSpeed = 100.0F;
-
 Player::Player() {}
 
 Player::Player(
@@ -15,8 +13,9 @@ Player::Player(
 	olc::vf2d vel,
 	float angle,
 	float acc,
+	float maxSpeed,
 	std::string path
-) : Body(pos, vel, angle, path), acc(acc) {}
+) : Body(pos, vel, angle, path), acc(acc), maxSpeed(maxSpeed) {}
 
 void Player::thrust(float fElapsedTime, bool forward)
 {
