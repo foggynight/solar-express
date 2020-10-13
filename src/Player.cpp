@@ -23,8 +23,8 @@ void Player::thrust(float fElapsedTime, bool forward)
 	vel.x += acc * cos(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
 	vel.y -= acc * sin(angle * pi) * fElapsedTime * (forward ? 1.0F : -1.0F);
 
-	float maxVelX = maxSpeed * cos(angle * pi);
-	float maxVelY = -maxSpeed * sin(angle * pi);
+	float maxVelX = maxSpeed * cos(angle * pi) * (forward ? 1.0F : -1.0F);
+	float maxVelY = -maxSpeed * sin(angle * pi) * (forward ? 1.0F : -1.0F);
 
 	auto fAbs = [](float n) { return (n > 0.0F) ? n : -1.0F * n; };
 
