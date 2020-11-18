@@ -1,3 +1,11 @@
+// SPDX-License-Identifier: GPL-2.0
+// Copyright (C) 2020 Robert Coffey
+/**
+ * --- solar-express ---
+ *
+ * Space delivery game.
+ */
+
 #include <array>
 #include <cstdlib>
 #include <fstream>
