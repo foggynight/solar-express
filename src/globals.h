@@ -1,5 +1,5 @@
 // Copyright (C) 2020 Robert Coffey
-// Licensed under the GNU GPLv2
+// Released under the GPLv2 license
 
 extern const int scrWidth;  // Screen width
 extern const int scrHeight; // Screen height

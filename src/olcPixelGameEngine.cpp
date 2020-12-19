@@ -1,5 +1,5 @@
 // Copyright (C) 2020 Robert Coffey
-// Licensed under the GNU GPLv2
+// Released under the GPLv2 license
 
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
