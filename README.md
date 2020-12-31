@@ -2,6 +2,11 @@
 
 Space delivery game.
 
+## Dependencies
+
+- GNU C++ compiler
+- Dependencies of olcPixelGameEngine: [olcPixelGameEngine Wiki](https://github.com/OneLoneCoder/olcPixelGameEngine/wiki)
+
 ## License
 
 Copyright (C) 2020 Robert Coffey
