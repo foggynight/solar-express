@@ -1,10 +1,11 @@
 # solar-express
 
-Space delivery game.
+Space delivery game
 
 ## Dependencies
 
-- GNU C++ compiler
+- GCC
+- Make
 - Dependencies of olcPixelGameEngine: [olcPixelGameEngine Wiki](https://github.com/OneLoneCoder/olcPixelGameEngine/wiki)
 
 ## License
